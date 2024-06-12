@@ -1,0 +1,91 @@
+import java.sql.*;
+import java.time.LocalDate;
+import java.util.*;
+
+// Model
+class Student {
+    private int id;
+    private String name;
+
+    public Student(int id, String name) {
+        this.id = id;
+        this.name = name;
+    }
+
+    // Getters and setters
+}
+
+class Attendance {
+    private int id;
+    private int studentId;
+    private LocalDate date;
+    private boolean present;
+
+    public Attendance(int id, int studentId, LocalDate date, boolean present) {
+        this.id = id;
+        this.studentId = studentId;
+        this.date = date;
+        this.present = present;
+    }
+
+    // Getters and setters
+}
+
+// DAO
+class AttendanceDAO {
+    private Connection connection;
+
+    public AttendanceDAO(Connection connection) {
+        this.connection = connection;
+    }
+
+    public void markAttendance(int studentId, LocalDate date, boolean present) throws SQLException {
+        String sql = "INSERT INTO attendance (student_id, date, present) VALUES (?, ?, ?)";
+        try (PreparedStatement statement = connection.prepareStatement(sql)) {
+            statement.setInt(1, studentId);
+            statement.setDate(2, Date.valueOf(date));
+            statement.setBoolean(3, present);
+            statement.executeUpdate();
+        }
+    }
+
+    // Other methods for querying attendance
+}
+
+// Controller
+class AttendanceController {
+    private AttendanceDAO attendanceDAO;
+
+    public AttendanceController(AttendanceDAO attendanceDAO) {
+        this.attendanceDAO = attendanceDAO;
+    }
+
+    public void markAttendance(int studentId, LocalDate date, boolean present) throws SQLException {
+        attendanceDAO.markAttendance(studentId, date, present);
+    }
+
+    // Other methods for managing attendance
+}
+
+// Main application
+public class AttendanceManagementSystem {
+    public static void main(String[] args) {
+        String url = "jdbc:mysql://localhost:3306/attendance_db";
+        String username = "CodeAlpha_git";
+        String password = "12345678";
+
+        try (Connection connection = DriverManager.getConnection(url, username, password)) {
+            // Instantiate DAO and Controller
+            AttendanceDAO attendanceDAO = new AttendanceDAO(connection);
+            AttendanceController attendanceController = new AttendanceController(attendanceDAO);
+
+            // Example usage
+            int studentId = 1;
+            LocalDate date = LocalDate.now();
+            boolean present = true;
+            attendanceController.markAttendance(studentId, date, present);
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+    }
+}
